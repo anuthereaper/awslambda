@@ -5,7 +5,7 @@ on:
 env:
   AWS_REGION: us-east-1
   LAMBDA_FUNCTION_NAME: MyNewLambdaFunction
-  AWS_ROLE_TO_ASSUME: arn:aws:iam::127489365181:role/gitactions-lambda-role
+  AWS_ROLE_TO_ASSUME1: arn:aws:iam::127489365181:role/gitactions-lambda-role
 
 permissions:
   id-token: write
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4.1.1
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -33,12 +33,10 @@ jobs:
         python -m unittest discover -s . -p 'test_*.py'
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v3
+      uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
-        role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/gitactions-lambda-role
         role-session-name: GitHubActionsLambdaDeployment
 
     - name: Zip the Lambda function
@@ -58,7 +56,7 @@ jobs:
         if [ "${{ steps.check_lambda.outputs.lambda_exists }}" == "false" ]; then
           echo "Creating Lambda function..."
           aws lambda create-function --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
-            --runtime python3.8 --role ${{ env.AWS_ROLE_TO_ASSUME }} \
+            --runtime python3.8 --role arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/gitactions-lambda-role \
             --handler lambda_function.lambda_handler --zip-file fileb://function.zip
         else
           echo "Updating Lambda function..."
