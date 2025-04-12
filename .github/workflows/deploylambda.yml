@@ -73,12 +73,11 @@ jobs:
             --auth-type NONE
     - name: Add permission to lambda function
       run: |    
-        echo "Enabling a URL for the Lambda function..."
-
+        echo "Adding permission to lambda function"
             aws lambda add-permission --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
             --statement-id example1-permission \
             --action lambda:InvokeFunctionUrl \
-            --principal * \
+            --principal "*" \
             --function-url-auth-type NONE
     - name: Clean up
       run: rm function.zip
